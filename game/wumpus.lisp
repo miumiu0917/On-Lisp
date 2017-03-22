@@ -88,3 +88,32 @@
                                              edge)))
                           node1-edges))))
   edge-alist))
+
+(defun neghbors (node edge-alist)
+  (mapcar #'car (cdr (assoc node edge-alist))))
+
+(defun within-one (a b edge-alist)
+  (member b (neighbors a edge-alist)))
+
+(defun within-two (a b edge-alist)
+  (or (within-one a b edge-alist)
+      (some (lambda (x)
+                    (within-one x b edge-alist))
+            (neighbors a edge-alist))))
+
+(defun make-city-nodes (edge-alist)
+  (let ((wumpus (random-node))
+        (glow-worms (loop for i below *worm-num*
+                      collect (random-node))))
+    (loop for n from 1 to *node-num*
+      collect (append (list n)
+                      (cond ((eql n wumpus) '(wumpus))
+                        ((within-two n wumpus edge-alist) '(blood!)))
+                      (cond ((member n glow-worms)
+                             '(glow-worm))
+                        ((some (lambda (worm)
+                                       (within-one n worm edge-alist))
+                               glow-worms)
+                         '(lights!)))
+                        (when (some #'cdr (cdr (assoc n edge-alist)))
+                          '(sirens!))))))
