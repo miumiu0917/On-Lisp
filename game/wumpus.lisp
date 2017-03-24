@@ -53,12 +53,12 @@
     (append (edge-pair (caar islands) (caadr islands))
             (connect-with-bridges (cdr islands)))))
 
-(defun connect-all-islands (node edge-list)
+(defun connect-all-islands (nodes edge-list)
   (append (connect-with-bridges (find-islands nodes edge-list)) edge-list))
 
 (defun make-city-edges ()
-  (let* ((nodes (loop for i in from 1 to *node-num*
-                 collecty i))
+  (let* ((nodes (loop for i from 1 to *node-num*
+                 collect i))
         (edge-list (connect-all-islands nodes (make-edge-list)))
         (cops (remove-if-not (lambda (x)
                                      (zerop (random *cop-odds*)))
@@ -83,13 +83,13 @@
                                          (let ((node2 (car edge)))
                                            (if (intersection (edge-pair node1 node2)
                                                              edges-with-cops
-                                                             :text #'equal)
+                                                             :test #'equal)
                                              (list node2 'cops)
                                              edge)))
                           node1-edges))))
   edge-alist))
 
-(defun neghbors (node edge-alist)
+(defun neighbors (node edge-alist)
   (mapcar #'car (cdr (assoc node edge-alist))))
 
 (defun within-one (a b edge-alist)
@@ -117,3 +117,21 @@
                          '(lights!)))
                         (when (some #'cdr (cdr (assoc n edge-alist)))
                           '(sirens!))))))
+
+(defun find-empty-node ()
+  (let ((x (random-node)))
+    (if (cdr (assoc x *congestion-city-nodes*))
+      (find-empty-node)
+      x)))
+
+(defun draw-city ()
+  (ugraph->png "city" *congestion-city-nodes* *congestion-city-edges*))
+
+(defun new-game()
+  (setf *congestion-city-edges* (make-city-edges))
+  (setf *congestion-city-nodes* (make-city-nodes *congestion-city-edges*))
+  (setf *player-pos* (find-empty-node))
+  (setf *visited-nodes* (list *player-pos*))
+  (draw-city))
+
+(new-game)
