@@ -10,4 +10,4 @@
         (print x)))))
 
 (loop for i from 1 to *loop-count*
- do (fizzbuzz i))
+  do (fizzbuzz i))
