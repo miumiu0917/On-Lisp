@@ -1,4 +1,5 @@
-(defparameter *dot-count* 1000)
+(setf *random-state* (make-random-state t))
+(defparameter *dot-count* 100000)
 
 (defun random-num ()
   (/ (random 1000000) 1000000))
@@ -10,15 +11,14 @@
   (distance-from-origin (random-num) (random-num)))
 
 (defun less-than-one (l)
-  (if (> 1.0 l)
-    1.0
-      0.0))
-
-(defun sum (i)
-  (sum (+ i (less-than-one(one-dot-distance)))))
+  (if (> 1.0 l) 1.0 0.0))
 
 (defun do-montecarlo ()
-  (loop for i from 1 to *dot-count*
-    do (sum 0)))
+  (progn
+    (setq count 0.0)
+      (loop for i from 1 to *dot-count*
+        do (setq count (+ count (less-than-one (one-dot-distance)))))
+          (* 4 (/ count *dot-count*))))
+    
 
-(print (do-montecarlo))
+(print  (do-montecarlo))
